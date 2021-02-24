@@ -128,6 +128,12 @@ __interrupt void Timer_A1 (void)
   }
 }*/
 
+//variable PWM period 2-4msec. Duty Cycle 50% , so the pwm is high 1-2msec.
+//this is driven by the high state of PWM using CCR1 (varies 1001 steps->1msec to 1999steps->2msec approx)
+//then CCR0 which is the PWM period is simply double CCR1 (mult by2).
+//the interrupt vector TIMER0_A1_VECTOR is enabled by TAIE , and the CCR1 interrupt is enabled by TA0CCTL1 |= CCIE;
+//the whole example uses a single Timer (timer0), so Timer1 is free, but it is possible to use 2 timers.
+//In fact the 1st attempt was based on initVariablePwm() (see above), where 2 timers are used.
 void initVarPwmPeriod()
 {
 	// GPIO Set-Up 
@@ -135,8 +141,8 @@ void initVarPwmPeriod()
     P1SEL |= BIT0 | BIT6;					// P1.0 & P1.6 selected Timer0_A Out1 output
 
 	// Timer0_A Set-Up
-    TA0CCR0 |= 2000;					// PWM period
-    TA0CCR1 |= 1000;					// TA0CCR1 PWM duty cycle
+    TA0CCR1 = 1000;					// TA0CCR1 PWM duty cycle "high" state
+    TA0CCR0 = TA0CCR1 << 1;					// PWM period (is double  the high state)
     TA0CCTL1 |= OUTMOD_7 | CCIE;			// TA0CCR1 output mode = reset/set
     TA0CTL |= TASSEL_2 | MC_1 | TAIE;		// SMCLK, Up Mode (Counts to TA0CCR0)
 
@@ -144,7 +150,7 @@ void initVarPwmPeriod()
     //TA1CCR0 |= 2000;					// Counter value
     //TA1CCTL0 |= CCIE;				// Enable Timer1_A interrupts
     //TA1CTL |= TASSEL_2 + MC_1          ;		// SMCLK, Up Mode (Counts to TA1CCR0)
-    
+
     IncDec_PWM = 1;
 }
 
