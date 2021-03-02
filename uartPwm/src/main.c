@@ -1,35 +1,31 @@
-/**
- * Copyright (C) PlatformIO <contact@platformio.org>
- * See LICENSE for details.
- */
+/*
+** Author: Alan Barr 
+** Created: 2011
+*/
+/* Builds with mspgcc */
+/* This project demonstrates a simple command line interface on the Launchpad.
+** Communication with the launchpad is achieved over the USB UART interface
+** using a hardware UART. For this to work, the two jumpers on the Launchpad for
+** UART should be aligned horizontally (perpendicular to the other jumpers).
+** A program such as HyperTerminal (Windows) or Minicom/CuteCom (Linux)
+** can be used to communicate with the Launchpad. (On Linux the Launchpad shows 
+** up as /dev/ACM0).
+** Strings received at the MSP430 are parsed to see if they match the commands
+** defined in a command structure. If they do, their counter part functions 
+** are called via function pointers.
+** This example requires only a launchpad, so the examples are rather basic.
+** You can turn on, off or toggle the launchpad LEDs.
+*/
 
-/*#include <msp430g2553.h>
+#include "time430.h"
+#include "msp430g2553.h"
+#include "uart_hw.h"
+#include "stringFunctions.h"
+#include "commandFunctions.h"
 
-int main(void)
-{
-    WDTCTL = WDTPW + WDTHOLD;
 
-    // make the LED pin an output for P1.0
-    P1DIR |= 0x41;
-
-    volatile int i;
-
-    P1OUT = 0x40;
-
-    while (1)
-    {
-        for (i = 0; i < 10000; i++);
-
-        // toggle the LEDs
-        P1OUT ^= 0x41;
-    }
-
-    return 0;
-}*/
-
-#define TIME430_CLOCK_FREQ 16 //MHz
-
-#include "cli.h"
+#define UARTBUFSIZE     (20)
+#define PROMPT          "\n\r$"
 
 static void commandParser(char * stringToParse, tCommandStruct * commandStructPtr);
 

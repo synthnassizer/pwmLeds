@@ -8,8 +8,7 @@
 
 #include <msp430g2553.h>
 #include "commandFunctions.h"
-#include "uart.h"
-//#include "cli.h"
+#include "uart_hw.h"
 
 
 
@@ -21,7 +20,7 @@ const tCommandStruct commandList[COMMANDLISTSIZE]= {{"led one on",&(led1On)},
                                                     {"led two toggle",&(led2Toggle)},
                                                     {"help", &(cliHelp)},
                                                     {"reset", &(reset)}
-                                                    };   
+                                                    };
 
 void led1On(void)
 {
