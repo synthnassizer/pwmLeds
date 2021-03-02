@@ -23,7 +23,6 @@
 #include "stringFunctions.h"
 #include "commandFunctions.h"
 
-
 #define UARTBUFSIZE     (20)
 #define PROMPT          "\n\r$"
 
