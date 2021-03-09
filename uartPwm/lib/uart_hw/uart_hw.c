@@ -12,7 +12,6 @@
 #include "time430.h"
 #include "legacymsp430.h"
 #include "msp430.h"
-
 volatile unsigned int uartRxBufferIndex = 0;                    // External, zero elsewhere
 
 volatile static unsigned char gUartBufSize = 0;                 // Size of receive buffer
@@ -45,6 +44,13 @@ void uartInit(volatile char * pBuffer, volatile unsigned char sizeOfBuffer)
 }
 
 
+int putchar(int c)
+{
+    while ( ( UC0IFG & UCA0TXIFG ) == 0 );
+    UCA0TXBUF = (char)c;
+    return 0;
+}
+
 void uartPrint(const char *string)
 {
     while (IE2 & UCA0TXIE)
@@ -54,7 +60,6 @@ void uartPrint(const char *string)
     uartTxString = string;
     IE2 |= UCA0TXIE; 
 }
-
 
 void uartDisable(void)
 {
@@ -85,7 +90,7 @@ __interrupt void USCI_RX_ISR(void)
     if (uartRxBufferIndex < gUartBufSize)
     {
         gUartRxBuffer[uartRxBufferIndex] = UCA0RXBUF;
-        UCA0TXBUF = gUartRxBuffer[uartRxBufferIndex]; //XXX Debug echo. Not smart.
+        //UCA0TXBUF = gUartRxBuffer[uartRxBufferIndex]; //XXX Debug echo. Not smart.
         uartRxBufferIndex++;
     }
 }
