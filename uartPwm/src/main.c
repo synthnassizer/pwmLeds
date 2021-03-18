@@ -20,7 +20,6 @@
 #include "time430.h"
 #include "uart_hw.h"
 #include "pwm.h"
-//#include "commandFunctions.h"
 #include "stringFunctions.h"
 #include "lexParser.h"
 
@@ -44,9 +43,8 @@ int main(void)
     memClear((char *)uartRxBuffer, UARTBUFSIZE);
     putchar('\n');
     putchar('\r');
-    PRINT("Cli Started.");
-    //cliHelp();
-    PRINT(PROMPT);
+    printf("Cli Started.");
+    printf(PROMPT);
     memClear((char *)uartRxBuffer, UARTBUFSIZE);
 
     /* Loop constantly checks UART buffer for a newline or carriage return.
@@ -59,7 +57,7 @@ int main(void)
         {
             uartRxBufferIndex = 0;
             memClear((char*)uartRxBuffer, sizeof(uartRxBuffer));
-            PRINT(PROMPT);
+            printf(PROMPT);
         }
 
         /* If last char received was a newline, parse */
@@ -67,11 +65,10 @@ int main(void)
                 uartRxBuffer[uartRxBufferIndex -1] == '\r')
         {
             uartRxBuffer[uartRxBufferIndex - 1] = '\0';
-            //commandParser((char *)uartRxBuffer);
             parseCmd((char *)uartRxBuffer);
             uartRxBufferIndex = 0;
             memClear((char *)uartRxBuffer, UARTBUFSIZE);
-            PRINT(PROMPT);
+            printf(PROMPT);
         }
     }
 

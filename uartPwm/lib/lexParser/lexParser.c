@@ -96,7 +96,6 @@ int parseCmd(char * s)
     int ret = -1;
     char * rest = NULL;
     int eCmdIdx = parseToken(s, &rest);
-    //char err[100];
 
     switch ((enum eKeywords)eCmdIdx)
     {

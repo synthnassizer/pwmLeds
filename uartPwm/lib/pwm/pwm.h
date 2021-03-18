@@ -3,6 +3,8 @@
 
 void initPwm();
 
+void setMaxIntensity(unsigned short const value);
+unsigned short getMaxIntensity();
 void setSteps(unsigned short const red,
               unsigned short const green,
               unsigned short const blue);
@@ -13,7 +15,7 @@ unsigned short getGreen();
 void setBlue(unsigned short const blue);
 unsigned short getBlue();
 
-void setMode(unsigned short const mode);
+void setMode(unsigned short const mode, unsigned short speed);
 unsigned short getMode();
 
 #endif /* PWM_H_ */
