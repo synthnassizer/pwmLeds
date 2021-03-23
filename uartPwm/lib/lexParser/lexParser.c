@@ -2,21 +2,22 @@
 #include <ctype.h>
 #include <stdlib.h>
 #include <string.h>
-#include "uart_hw.h"
-#include "pwm.h"
 #include <stdio.h>
+#include "animations.h"
+#include "uart_hw.h"
 
 #define DELIM " \n\r\t"
 
 
-#define KEYWORDS_NUM 9
-enum eKeywords { set , get , color , all , pwm , mode , red , green , blue };
-const char * keywordStrs[KEYWORDS_NUM] = { "set", "get" , "color" , "all" , "pwm" , "mode" , "red" , "green" , "blue" };
-
+//#define KEYWORDS_NUM 9
+enum eKeywords { set , get , color , all , pwm , mode , speed , maxInt };
+const char * keywordStrs[] = { "set", "get" , "color" , "all" , "pwm" , "mode" , "speed" , "maxInt" };
 
 typedef void (*setFunc)(unsigned short);
-int setValue(char ** rest, setFunc setFn);
+typedef void (*setFunc3Arg)(unsigned short const,unsigned short const,unsigned short const);
 
+int setValue(char ** rest, setFunc setFn);
+int setTripleValue(char ** rest, setFunc3Arg setFn);
 int findKeyword(char const * s);
 int parseValue(char ** s, unsigned short * value);
 int parseTripleValue(char ** s, unsigned short * value1, unsigned short * value2, unsigned short * value3);
@@ -24,9 +25,8 @@ int parseSetCmd(char ** rest);
 int parseGetCmd(char ** rest);
 int parseSetColor(char ** rest);
 int parseSetMode(char ** rest);
-int parseSetRed(char ** rest);
-int parseSetGreen(char ** rest);
-int parseSetBlue(char ** rest);
+int parseSetSpeed(char ** rest);
+int parseSetMaxInt(char ** rest);
 
 
 
@@ -131,9 +131,8 @@ int parseSetCmd(char ** rest)
         case pwm : 
         case color : ret = parseSetColor(rest); break;
         case mode : ret = parseSetMode(rest); break;
-        case red : ret = parseSetRed(rest); break;
-        case green : ret = parseSetGreen(rest); break;
-        case blue : ret = parseSetBlue(rest); break;
+        case speed : ret = parseSetSpeed(rest); break;
+        case maxInt : ret = parseSetMaxInt(rest); break;
         default: printf("Unexpected set cmd identifier '%s'." NLRF,current);
             break;
     }
@@ -146,16 +145,17 @@ int parseGetCmd(char ** rest)
     int ret = 0;
     char const * current = *rest;
     int eCmdIdx = parseToken(NULL, rest);
+    tRGB const * col = NULL; //colors
 
     switch ((enum eKeywords)eCmdIdx)
     {
         case color :
-            printf("R 0x%x , G 0x%x , B 0x%x" NLRF, getRed(), getGreen(), getBlue());
+            col = getColorsPtr();
+            printf("R 0x%x , G 0x%x , B 0x%x" NLRF, col->r, col->g, col->b);
             break;
-        case mode :  printf("Opmode %d" NLRF,getMode()); break;
-        case red :   printf("R 0x%x" NLRF,getRed()); break;
-        case green : printf("G 0x%x" NLRF,getGreen()); break;
-        case blue :  printf("B  0x%x" NLRF,getBlue()); break;
+        case mode   : printf("Opmode %d" NLRF,getMode()); break;
+        case speed  : printf("R 0x%x" NLRF,getSpeed()); break;
+        case maxInt : printf("G 0x%x" NLRF,getMaxIntensity()); break;
         default: 
             printf("Unexpected get cmd identifier '%s'." NLRF,current);
             ret = -1;
@@ -165,24 +165,36 @@ int parseGetCmd(char ** rest)
     return ret;
 }
 
-int parseSetColor(char ** rest)
+int setTripleValue(char ** rest, setFunc3Arg setFn)
 {
-    unsigned short red = 0;
-    unsigned short green = 0;
-    unsigned short blue = 0;
-    int ret = parseTripleValue(rest, &red, &green, &blue);
+    unsigned short val1 = 0;
+    unsigned short val2 = 0;
+    unsigned short val3 = 0;
+    int ret = parseTripleValue(rest, &val1, &val2, &val3);
 
     if (-1 != ret)
     {
-        setSteps(red, green, blue);
+        setFn(val1, val2, val3);
     }
     else
     {
-        printf("Failed to parse all 3 RGB values in '%s'" NLRF,*rest);
+        printf("Failed to parse all 3 values in '%s'" NLRF,*rest);
     }
 
     return ret;
 }
+
+int parseSetColor(char ** rest)
+{
+    return setTripleValue(rest, setColors); //red, green, blue
+}
+
+int parseSetMode(char ** rest)
+{
+    return setTripleValue(rest, &setMode); //mode, speed, maxIntensity
+}
+
+
 
 int setValue(char ** rest, setFunc setFn)
 {
@@ -201,23 +213,13 @@ int setValue(char ** rest, setFunc setFn)
     return ret;
 }
 
-int parseSetMode(char ** rest)
+int parseSetSpeed(char ** rest)
 {
-    return setValue(rest, &setMode);
+    return setValue(rest, &setSpeed);
 }
 
-int parseSetRed(char ** rest)
+int parseSetMaxInt(char ** rest)
 {
-    return setValue(rest, &setRed);
-}
-
-int parseSetGreen(char ** rest)
-{
-    return setValue(rest, &setGreen);
-}
-
-int parseSetBlue(char ** rest)
-{
-    return setValue(rest, &setBlue);
+    return setValue(rest, &setMaxIntensity);
 }
 

@@ -22,6 +22,7 @@
 #include "pwm.h"
 #include "stringFunctions.h"
 #include "lexParser.h"
+#include "animations.h"
 
 #define LED1 BIT0
 #define LED2 BIT6
@@ -66,6 +67,7 @@ int main(void)
         {
             uartRxBuffer[uartRxBufferIndex - 1] = '\0';
             parseCmd((char *)uartRxBuffer);
+            performAnimation();
             uartRxBufferIndex = 0;
             memClear((char *)uartRxBuffer, UARTBUFSIZE);
             printf(PROMPT);
